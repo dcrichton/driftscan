@@ -7,7 +7,8 @@ import numpy as np
 
 import versioneer
 
-drift_data = {"drift.telescope": ["gmrtpositions.dat"]}
+drift_data = {"drift.telescope": ["gmrtpositions.dat"], 
+    "drift.telescope.custom_disharray": ["data/hirax_hextile_template_1024.dat"]}
 
 # Load the requirements list
 with open("requirements.txt", "r") as fh:
