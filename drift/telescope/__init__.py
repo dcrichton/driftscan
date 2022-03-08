@@ -6,6 +6,7 @@ Telescope class implementation
 
     cylbeam
     cylinder
+    custom_disharray
     disharray
     exotic_cylinder
     focalplane
