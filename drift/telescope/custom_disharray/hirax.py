@@ -1,4 +1,19 @@
-"""Implementations of simple models of the HIRAX telescope.
+"""Implementations of simple models of the HIRAX telescope. Identical
+to telescope objects in :py:mod:`drift.telescope.custom_disharray.PolarisedDishArray` and 
+:py:mod:`drift.telescope.custom_disharray.PolarisedDishArraySurvey` but with 
+the following HIRAX defaults:
+
+    * Frequency channels set to the HIRAX band (400-800 MHz with 1025 channels)
+    * Observatory location set to the (approximate) location of the HIRAX array.
+    * A grid array layout with 6.5 m EW spacing and 8.5 m NS spacing for the default 
+      array in the case of :py:class:`HIRAX` and :py:class:`HIRAXSurvey` or the hex-tile
+      array layout in the case of :py:class:`HIRAXHexTile` and :py:class:`HIRAXHexTileSurvey`.
+
+Note that these defaults represent a large telescope object to simulate. For smaller
+scale runs use :py:class:`drift.core.telescope.TransitTelescope` configuration 
+parameters such as `maxlength` to cut down the baselines considered. Additionally 
+using broader frequency channels over a sub-band is often useful.
+
 """
 
 from pkg_resources import resource_filename
@@ -15,6 +30,9 @@ HIRAX_ALTITUDE = 1113.0  # m
 
 
 class _HIRAXDefaults(CustomDishArray, config.Reader, metaclass=abc.ABCMeta):
+    """Mixin for a HIRAX-like telescope. :py:class:`.core.CustomDishArray` but 
+    with defaults mentioned above.
+    """
 
     freq_start = config.Property(proptype=float, default=400)
     freq_end = config.Property(proptype=float, default=800)
@@ -37,14 +55,20 @@ class _HIRAXDefaults(CustomDishArray, config.Reader, metaclass=abc.ABCMeta):
 
 
 class HIRAX(_HIRAXDefaults, PolarisedTelescope):
+    """Single pointing HIRAX telescope. 
+    """
     pass
 
 
 class HIRAXSurvey(MultiElevationSurvey, HIRAX):
+    """A multi-pointed HIRAX survey.
+    """
     pass
 
 
 class _HIRAXHexTile(_HIRAXDefaults, config.Reader, metaclass=abc.ABCMeta):
+    """Mixin for HIRAX defaults but with hex-tile array layout.
+    """
 
     layout_spec = config.Property(
         proptype=dict,
@@ -63,8 +87,13 @@ class _HIRAXHexTile(_HIRAXDefaults, config.Reader, metaclass=abc.ABCMeta):
 
 
 class HIRAXHexTile(_HIRAXHexTile, PolarisedTelescope):
+    """Single pointing HIRAX telescope using the Hex-tile array layout 
+    (reference to be added).
+    """
     pass
 
 
 class HIRAXHexTileSurvey(MultiElevationSurvey, HIRAX):
+    """A multi-pointed HIRAX survey  using the Hex-tile array layout 
+    (reference to be added)."""
     pass

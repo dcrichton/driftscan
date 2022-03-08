@@ -15,6 +15,11 @@ Concrete Implementations
 - :py:class:`.core.UnpolarisedDishArray`
 - :py:class:`.core.UnpolarisedDishArraySurvey`
 
+- :py:class:`.hirax.HIRAX`
+- :py:class:`.hirax.HIRAXSurvey`
+- :py:class:`.hirax.HIRAXHexTile`
+- :py:class:`.hirax.HIRAXHexTileSurvey`
+
 .. autosummary::
     :toctree:
 
