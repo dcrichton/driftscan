@@ -1,7 +1,8 @@
 """
-Implementations of customisable, dish-array transit telescopes with support for multi-pointed
-surveys. Mixin classes for adding these functions to generic :py:class:`drift.core.telescope.TransitTelescope`'s are
-provided.
+Implementations of customisable, dish-array transit telescopes with 
+support for multi-pointed surveys. Mixin classes for adding this 
+functionality to generic :py:class:`drift.core.telescope.TransitTelescope`'s 
+are provided.
 
 Mixins
 ======

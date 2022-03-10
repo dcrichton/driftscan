@@ -1,4 +1,70 @@
 """Helpers for parameterised construction of array layouts.
+
+The classes provide parameterised array layouts made use of by the 
+:py:class:`..core.CustomDishArray` mixin. These can be specified in the 
+`layout_spec` section of the configuration file. If the 
+:py:class:`drift.core.telescope.TransitTelescope` is a polarised telescope, 
+each station will be assumed to have an "X" and "Y" polarised feed.
+
+For example:
+
+.. code-block:: yaml
+
+    # In a drift-makeproducts configuration file:
+
+    telescope:
+      
+      # Must be a TransitTelescope (sub)-class with CustomDishArray mixin.
+      type: PolarisedDishArray 
+
+      # Any TransitTelescope / CustomDishArray Parameters
+      ...
+
+      layout_spec:
+        # 10 x 10 array with 6.5 feed separation in the EW direction and
+        # 8.5 m feed separation in the NS direction.
+        type: grid
+        grid_ew: 10
+        grid_ns: 10
+        spacing_ew: 6.5 # metres
+        spacing_ns: 8.5 # metres
+                
+      
+Other examples:
+
+.. code-block:: yaml
+
+    layout_spec:
+      # Array layout specifed by data files with two whitespace separated
+      # columns of EW and NS feed separation (in that order).
+      # Expects a list (possibly of lenght one) of files that will be
+      # concatenated.
+      type: file
+      filenames:
+        - /path/to/feed_positions_1.dat
+        - /path/to/feed_positions_1.dat
+
+.. code-block:: yaml
+
+    layout_spec:
+      # Array layout specifed by data files with two whitespace separated
+      # columns of EW and NS dimensionless template separations.
+      # The actual feed separation will be determined by the spacing_ew and
+      # spacing_ns parameters multiplied by the template separations.
+      # Useful for trying the same layout with different spacings.
+      type: file
+      filenames:
+        - /path/to/feed_positions_template.dat
+      spacing_ew: 10 # metres
+      spacing_ns: 20 # metres
+
+Currently supported `layout_spec` types are:
+
+- `grid` provided by :py:class:`GridLayout`
+- `file` provided by :py:class:`SimpleLayoutFile`
+
+See their class and base class definitions for more parameter options. 
+
 """
 
 from typing import Optional
