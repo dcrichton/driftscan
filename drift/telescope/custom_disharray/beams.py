@@ -534,9 +534,9 @@ class AnalyticCoPolBeam(config.Reader, metaclass=abc.ABCMeta):
             return copol_beam
         else:
 
-            if self.pol_type == "pure":
+            if self.crosspol_type == "pure":
                 cocr_beam = np.stack([copol_beam, np.zeros_like(copol_beam)], axis=-1)
-            elif self.pol_type == "scaled":
+            elif self.crosspol_type == "scaled":
                 cocr_beam = np.stack(
                     [copol_beam, copol_beam * (10 ** (self.crosspol_scale_dB / 10))],
                     axis=-1,
