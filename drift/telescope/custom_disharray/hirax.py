@@ -96,7 +96,7 @@ class HIRAXHexTile(_HIRAXHexTile, PolarisedTelescope):
     pass
 
 
-class HIRAXHexTileSurvey(MultiElevationSurvey, HIRAX):
+class HIRAXHexTileSurvey(MultiElevationSurvey, HIRAXHexTile):
     """A multi-pointed HIRAX survey  using the Hex-tile array layout 
     (reference to be added)."""
 

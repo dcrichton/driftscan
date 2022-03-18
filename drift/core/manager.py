@@ -52,7 +52,7 @@ teltype_dict = {
     "PolarisedDishArraySurvey": PolarisedDishArraySurvey,
     "UnpolarisedDishArray": UnpolarisedDishArray,
     "UnpolarisedDishArraySurvey": UnpolarisedDishArraySurvey,
-    "HIRAXSinglePointing": HIRAX,
+    "HIRAX": HIRAX,
     "HIRAXSurvey": HIRAXSurvey,
     "HIRAXHexTile": HIRAXHexTile,
     "HIRAXHexTileSurvey": HIRAXHexTileSurvey,
