@@ -15,11 +15,20 @@ Concrete Implementations
 - :py:class:`.core.PolarisedDishArraySurvey`
 - :py:class:`.core.UnpolarisedDishArray`
 - :py:class:`.core.UnpolarisedDishArraySurvey`
-
 - :py:class:`.hirax.HIRAX`
 - :py:class:`.hirax.HIRAXSurvey`
 - :py:class:`.hirax.HIRAXHexTile`
 - :py:class:`.hirax.HIRAXHexTileSurvey`
+
+.. note::
+
+    For subclassing, it is recommended to generate your own subclass of a
+    :py:class:`drift.core.telescope.TransitTelescope` and add the mixins
+    if desired. Directly subclassing the implementations provided may lead to 
+    unexpected behaviour. In particular, the :py:class:`.core.MultiElevationSurvey` mixin
+    works by reconstructing a telescope object using its own configuration and the 
+    class directly above it in it's class hierarchy. Unexpected
+    behaviour might occur if the mixin is not at the bottom of the class hierarchy.
 
 .. autosummary::
     :toctree:
@@ -51,7 +60,7 @@ For a concrete example of a 10x10 disharray, multi-pointed survey:
       freq_mode: edge
       num_freq: 64
 
-      ndays: 120 # Note for the multi-elecation survey this is now ndays per pointing.
+      ndays: 120 # Note for the multi-elevation survey this is now ndays per pointing.
       tsys_flat: 50
       maxlength: 50
 
@@ -73,7 +82,7 @@ For a concrete example of a 10x10 disharray, multi-pointed survey:
       longitude: 0
       altitude: 1000
 
-      # Minimum inter-feed spacing in metres for l,m limit calculations
+      # Minimum inter-feed spacing in metres for m, l limit calculations
       min_u: 6.5
       min_v: 8.5
 

@@ -35,9 +35,9 @@ Other examples:
 .. code-block:: yaml
 
     layout_spec:
-      # Array layout specifed by data files with two whitespace separated
+      # Array layout specified by data files with two whitespace separated
       # columns of EW and NS feed separation (in that order).
-      # Expects a list (possibly of lenght one) of files that will be
+      # Expects a list (possibly of length one) of files that will be
       # concatenated.
       type: file
       filenames:
@@ -47,7 +47,7 @@ Other examples:
 .. code-block:: yaml
 
     layout_spec:
-      # Array layout specifed by data files with two whitespace separated
+      # Array layout specified by data files with two whitespace separated
       # columns of EW and NS dimensionless template separations.
       # The actual feed separation will be determined by the spacing_ew and
       # spacing_ns parameters multiplied by the template separations.

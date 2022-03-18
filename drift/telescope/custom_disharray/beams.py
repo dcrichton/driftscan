@@ -90,14 +90,13 @@ def rot_mats_thetaphi(theta: float, phi: float) -> Tuple[np.ndarray, np.ndarray]
 
     Parameters
     ----------
-    theta : float
+    theta
         Theta in radians.
-    phi : float
+    phi
         Phi in radians.
 
     Returns
     -------
-    Tuple[np.ndarray, np.ndarray]
         Tuple of (3, 3) theta_rotation_matrix and phi_rotation_matrix
     """
 
@@ -123,14 +122,13 @@ def pointing_rot_mat(zenith: np.ndarray, altaz_pointing: np.ndarray) -> np.ndarr
 
     Parameters
     ----------
-    zenith : np.ndarray
+    zenith
         (2,) array of theta, phi zenith coordinates in radians.
-    altaz_pointing : np.ndarray
+    altaz_pointing
         (2,) array of altitude, azimuth coordinates in radians.
 
     Returns
     -------
-    np.ndarray
         (3, 3) rotation matrix.
     """
     rth, rphi = rot_mats_thetaphi(zenith[0], zenith[1])
@@ -151,17 +149,16 @@ def rotate_thetaphi_beam(
 
     Parameters
     ----------
-    beam : np.ndarray
+    beam
         (N, 2) vector beam pattern in Etheta, Ephi, assumed packed in RING 
         ordering. May be complex.
-    rot_theta : np.ndarray
+    rot_theta
         Angle to rotate by in the theta direction in radians. Positive theta
         rotates South.
-    angpos : np.ndarray
+    angpos
         (N, 2) array of healpix theta, phi coordinates.
     Returns
     -------
-    np.ndarray
         (N, 2) array of the rotated beam pattern in Etheta, Ephi.
     """
 
@@ -204,16 +201,15 @@ def pointing_offset_thetaphi_coords(
 
     Parameters
     ----------
-    angpos : np.ndarray
+    angpos
         (N, 2) array of healpix theta, phi coordinates.
-    zenith : np.ndarray
+    zenith
         (2,) array of theta, phi zenith coordinates in radians.
-    altaz_pointing : np.ndarray
+    altaz_pointing
         (2,) array of altitude, azimuth coordinates in radians.
 
     Returns
     -------
-    np.ndarray
         (N, 2) array of pointing offset coordinates 
     """
     cart_sky = coord.sph_to_cart(angpos)
@@ -244,20 +240,19 @@ def cocr_to_thetaphi(
 
     Parameters
     ----------
-    cocr_beam : np.ndarray
+    cocr_beam
         (N, 2) co-pol, cross-pol beam pattern.
     pol_type : str
         "X" or "Y". If "X" ("Y") do the conversion assuming the polarisation
         axis is aligned with the pointing-local vertical (horizontal).
-    angpos : np.ndarray
+    angpos
         (N, 2) array of healpix theta, phi coordinates.
-    zenith : np.ndarray
+    zenith
         (2,) array of theta, phi zenith coordinates in radians.
-    altaz_pointing : np.ndarray
+    altaz_pointing
         (2,) array of altitude, azimuth coordinates in radians.
     Returns
     -------
-    np.ndarray
         (N, 2) array of the converted beam pattern in Etheta, Ephi.
     """
 
@@ -293,19 +288,18 @@ def pointing_offset_separation(
 
     Parameters
     ----------
-    angpos : np.ndarray
+    angpos
         (N, 2) array of healpix theta, phi coordinates.
-    zenith : np.ndarray
+    zenith
         (2,) array of theta, phi zenith coordinates in radians.
-    altaz_pointing : np.ndarray
+    altaz_pointing
         (2,) array of altitude, azimuth coordinates in radians.
-    degrees : Optional[bool]
+    degrees
         If True, return the offset separation angle in degrees. 
         Default False
 
     Returns
     -------
-    np.ndarray
         (N,) array of angular separation angle from the pointing.
     """
 
@@ -343,19 +337,18 @@ def pointing_offset_angles(
 
     Parameters
     ----------
-    angpos : np.ndarray
+    angpos
         (N, 2) array of healpix theta, phi coordinates.
-    zenith : np.ndarray
+    zenith
         (2,) array of theta, phi zenith coordinates in radians.
-    altaz_pointing : np.ndarray
+    altaz_pointing
         (2,) array of altitude, azimuth coordinates in radians.
-    degrees : Optional[bool]
+    degrees
         If True, return the offset great circle angles in degrees. 
         Default False
 
     Returns
     -------
-    np.ndarray
         (N, 2) latitude, longitude offset angles relative to the pointing.
     """
 
@@ -387,25 +380,24 @@ def airy_beam(
 
     Parameters
     ----------
-    separations : array_like
-        Angular sperations (:math:`\\theta`) to calculate the 
+    separations
+        Angular separations (:math:`\\theta`) to calculate the 
         pattern at, units of radians.
-    wavelength : array_like
+    wavelength
         Wavelength (:math:`\lambda`) in metres to use.
-    diameter : array_like
+    diameter
         Effective dish diameter (:math:`D`) in metres to use.
-    voltage : Optional[bool]
+    voltage
         If True, return the above expression for a voltage beam,
         otherwise return the square of this pattern for an power
         beam. Default: True.
-    zero_over_horizon : Optional[bool]
+    zero_over_horizon
         If True, explicitly set the pattern at :math:`\\theta > \pi/2` to
         zero. Note that with the above expression, the beam pattern is
         symmetric around :math:`\\theta = \pi/2`. Default: True.
 
     Returns
     -------
-    array_like
         The voltage or power beam pattern with shape following the
         broadcasting rules of the parameters.
     """
@@ -453,27 +445,26 @@ def gaussian(
 
     Parameters
     ----------
-    separations : array_like
-        Angular sperations (:math:`\\theta`) to calculate the 
+    separations
+        Angular separations (:math:`\\theta`) to calculate the 
         pattern at, units of radians.
-    wavelength : array_like
+    wavelength
         Wavelength (:math:`\lambda`) in metres to use for FWHM calculation.
-    diameter : array_like
+    diameter
         Effective dish diameter (:math:`D`) in metres to use for FWHM calculation.
-    fwhm_factor : array_like
+    fwhm_factor
         Scaling factor (:math:`f`) for relationship between FWHM and 
         wavelength/diameter. A value of one approximates the
         main lobe of a uniformally illuminated aperture.
-    voltage : Optional[bool]
+    voltage
         If True, return the above expression for a voltage beam,
         otherwise return the square of this pattern for an power
         beam. Default: True.
 
     Returns
     -------
-    array_like
         The voltage or power beam pattern with shape following the
-        boradcasting rules of the parameters.
+        broadcasting rules of the parameters.
     """
 
     fwhm = fwhm_factor * wavelength / diameter
@@ -493,7 +484,6 @@ class AnalyticCoPolBeam(config.Reader, metaclass=abc.ABCMeta):
 
     Attributes
     ----------
-
     crosspol_type : :py:class:`caput.config.enum(["pure", "scaled"])`
         How to model the cross-pol component of the beam pattern. If
         "pure", cross-pol component is zero and we have a pure co-pol
@@ -585,7 +575,7 @@ class GaussianBeam(AnalyticCoPolBeam):
         See :py:func:`gaussian` for details.
         Default: 6 m
     fwhm_factor: :py:class:`caput.config.Property(proptype=float)`
-        The scaling factor to multipy the :math:`\lambda/D` term in
+        The scaling factor to multiply the :math:`\lambda/D` term in
         the FWHM calculation. See :py:func:`gaussian` for details.
         Default: 1
     """

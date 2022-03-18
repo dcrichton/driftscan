@@ -3,7 +3,7 @@ to telescope objects in :py:mod:`drift.telescope.custom_disharray.PolarisedDishA
 :py:mod:`drift.telescope.custom_disharray.PolarisedDishArraySurvey` but with 
 the following HIRAX defaults:
 
-    * Frequency channels set to the HIRAX band (400-800 MHz with 1025 channels)
+    * Frequency channels set to the HIRAX band (400-800 MHz with 1024 channels)
     * Observatory location set to the (approximate) location of the HIRAX array.
     * A grid array layout with 6.5 m EW spacing and 8.5 m NS spacing for the default 
       array in the case of :py:class:`HIRAX` and :py:class:`HIRAXSurvey` or the hex-tile
@@ -57,12 +57,14 @@ class _HIRAXDefaults(CustomDishArray, config.Reader, metaclass=abc.ABCMeta):
 class HIRAX(_HIRAXDefaults, PolarisedTelescope):
     """Single pointing HIRAX telescope. 
     """
+
     pass
 
 
 class HIRAXSurvey(MultiElevationSurvey, HIRAX):
     """A multi-pointed HIRAX survey.
     """
+
     pass
 
 
@@ -90,10 +92,12 @@ class HIRAXHexTile(_HIRAXHexTile, PolarisedTelescope):
     """Single pointing HIRAX telescope using the Hex-tile array layout 
     (reference to be added).
     """
+
     pass
 
 
 class HIRAXHexTileSurvey(MultiElevationSurvey, HIRAX):
     """A multi-pointed HIRAX survey  using the Hex-tile array layout 
     (reference to be added)."""
+
     pass

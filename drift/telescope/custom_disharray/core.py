@@ -1,4 +1,4 @@
-"""`TransitTelescope` Mixins and implementations.
+"""`TransitTelescope` mixins for dish array surveys with concrete implementations.
 """
 
 import inspect
@@ -16,19 +16,18 @@ from .layouts import AVAILABLE_LAYOUTS
 from .beams import AVAILABLE_BEAMS, rotate_thetaphi_beam
 
 
-def _confdict_from_classes(list_of_classes):
+def _confdict_from_classes(list_of_classes: list) -> dict:
     """Generate a dictionary of the :py:class:`caput.config.Property`'s of a list
-    of classes. Used to reconstructe the single pointing telescope
-    from the class hierarchy of a MultiElevationSurevy.
+    of classes. Used to reconstructs the single pointing telescope
+    from the class hierarchy of a MultiElevationSurvey.
 
     Parameters
     ----------
-    list_of_classes : list
+    list_of_classes
         List of classes to find config.Property attributes from.
 
     Returns
     -------
-    dict
         Dictionary of config.Property names and values.
     """
     confdict = {}
@@ -45,13 +44,13 @@ def _confdict_from_classes(list_of_classes):
 class CustomDishArray(config.Reader, metaclass=abc.ABCMeta):
     """
     Mixin for :py:class:`drift.core.telescope.TransitTelescope` that 
-    provides configurable array beams and array layouts, for dish array
+    provides configurable primary beams and array layouts for dish array
     surveys.
 
     Attributes
     ----------
     min_u, min_v: :py:class:`caput.config.Property(proptype=float)`
-        Minimum EW and NS element separation [in metres] used for m, l range calculations.
+        Minimum EW and NS element separation [in metres] used for l, m range calculations.
     latitude: :py:class:`caput.config.Property(proptype=float)`
         Telescope latitude in degrees.
     longitude: :py:class:`caput.config.Property(proptype=float)`
@@ -121,21 +120,20 @@ class CustomDishArray(config.Reader, metaclass=abc.ABCMeta):
         if self.layout_obj.polarisation is None:
             return np.zeros(self.layout_obj.feedpositions.shape[0])
         else:
-            return (self.layout_obj.polarisation == 'Y').astype(int)
+            return (self.layout_obj.polarisation == "Y").astype(int)
 
     def beam(self, feed_ind: int, freq_ind: int) -> np.ndarray:
         """Primary beam pattern extracted from the `beam_obj`.
 
         Parameters
         ----------
-        feed_ind : int
+        feed_ind
             Index of the feed to pass to the `beam_obj`.
-        freq_ind : int
+        freq_ind
             Frequency index to pass to the `beam_obj`.
 
         Returns
         ------- 
-        np.ndarray
             (npix, 2) Beam pattern in sky theta, phi directions. May be complex.
         """
         return self.beam_obj(self, feed_ind, freq_ind)
@@ -159,24 +157,25 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
 
     This works by duplicating the telescope feeds (and hence baselines),
     for each pointing. However pairs across pointings are masked so we
-    only linearly increase the number of baselines.
-
-    Primary beams from the :py:class:`CustomDishArray` may support a pointing
-    argument. Otherwise, the polarised HEALPix beam pattern is directly rotated.
-
-    A caveat to this approach is that the feed and baselines indices 
-    as well as related telescope state is now a mixture of physical indices 
-    and pointings. Some helper methods are provided to assist with decoupling
-    this.
+    only linearly increase the number of baselines. Primary beams from the 
+    :py:class:`CustomDishArray` may support a pointing  argument. Otherwise, 
+    the polarised HEALPix beam pattern is directly rotated. A caveat to this 
+    approach is that the feed and baselines indices as well as related telescope 
+    state is now a mixture of physical indices and pointings. Some helper 
+    methods are provided to assist with decoupling this. 
+        
+    .. note::
+        For implementation reasons it is also strongly recommended that this
+        mixin be the bottom of the class hierarchy.
 
     Attributes
     ----------
     elevation_start: :py:class:`caput.config.Property(proptype=float)`
-        Start point of the elevation offset pointings, relative to zentih in degrees.
+        Start point of the elevation offset pointings, relative to zenith in degrees.
         Positive is north of zenith, negative is south of zenith.
         Default: -10 [degrees]
     elevation_stop: :py:class:`caput.config.Property(proptype=float)`
-        End point of the elevation offset pointings, relative to zentih in degrees. 
+        End point of the elevation offset pointings, relative to zenith in degrees. 
         Positive is north of zenith, negative is south of zenith.
         Default: 10 [degrees]
     npointings: :py:class:`caput.config.Property(proptype=int)`
@@ -281,7 +280,7 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
 
     @property
     def beamclass(self) -> np.ndarray:
-        """(nfeed_actual x npointings, ) array of beamclass indices repeated and 
+        """(nfeed_actual x npointings,) array of beamclass indices repeated and 
         made unique for each pointing.
         """
         orig_bc = self.single_pointing_telescope.beamclass
@@ -310,14 +309,13 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        feed_ind : int
+        feed_ind
             Index of the feed to pass to the `beam_obj`.
-        freq_ind : int
+        freq_ind
             Frequency index to pass to the `beam_obj`.
 
         Returns
         ------- 
-        np.ndarray
             (npix, 2) Beam pattern in sky theta, phi directions. May be complex.
         """
         ddec = self.elevation_pointings[self.pointing_feedmap[feed_ind]]  # In degrees
@@ -340,22 +338,26 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
 class PolarisedDishArray(CustomDishArray, PolarisedTelescope):
     """A polarised, configurable dish array.
     """
+
     pass
 
 
 class PolarisedDishArraySurvey(MultiElevationSurvey, PolarisedDishArray):
     """A polarised, configurable dish array survey with multiple elevation pointings.
     """
+
     pass
 
 
 class UnpolarisedDishArray(CustomDishArray, UnpolarisedTelescope):
     """An unpolarised, configurable dish array.
     """
+
     pass
 
 
 class UnpolarisedDishArraySurvey(MultiElevationSurvey, UnpolarisedDishArray):
     """An unpolarised, configurable dish array survey with multiple elevation pointings.
     """
+
     pass
