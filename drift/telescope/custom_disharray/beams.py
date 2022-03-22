@@ -62,6 +62,7 @@ from __future__ import division, print_function, absolute_import, unicode_litera
 
 from typing import Literal, Optional, Tuple, Union
 import abc
+import logging
 
 from scipy.special import j1 as bessel_j1
 import numpy as np
@@ -164,7 +165,18 @@ def rotate_thetaphi_beam(
 
     # Rotate amplitude of Eth and Eph beam terms
     hp_rot = hp.Rotator(rot=(0, rot_theta, 0), deg=False)
+
+    # If a null rotation, do nothing and return the original beam
+    if not hp_rot.do_rot(0):
+        return beam
+        
     thph_amp_rot = np.empty_like(beam)
+
+    # Healpy spams logs when on log level INFO (as in during a makeproducts run)
+    # This sets the healpix log level to warn for the rotation
+    global_log_level = logging.getLogger().level
+    hp_logger = logging.getLogger("healpy")
+    hp_logger.setLevel(level=logging.WARN)
 
     thph_amp_rot[:, 0] = hp_rot.rotate_map_alms(beam[:, 0].real)
     thph_amp_rot[:, 1] = hp_rot.rotate_map_alms(beam[:, 1].real)
@@ -172,6 +184,8 @@ def rotate_thetaphi_beam(
     if np.iscomplexobj(beam):
         thph_amp_rot[:, 0] += 1j * hp_rot.rotate_map_alms(beam[:, 0].real)
         thph_amp_rot[:, 1] += 1j * hp_rot.rotate_map_alms(beam[:, 1].real)
+
+    hp_logger.setLevel(level=global_log_level)
 
     # Need to correct for change of polarisation coordinate system
     # Work out projection of theta_hat and phi_hat onto theta_hat and
@@ -631,21 +645,20 @@ class HEALPixBeamFile(config.Reader):
 
     supports_pointing = False
 
-    def _finalise_config(self):
-        from draco.core.containers import HEALPixBeam
-
-        self.beam_file = HEALPixBeam.from_file(
-            self.filename, mode="r", distributed=False, ondisk=True
-        )
-
-        super()._finalise_config()
-
     def __call__(
         self, tel_obj: TransitTelescope, feed_ind: int, freq_ind: int
     ) -> np.ndarray:
 
+        from draco.core.containers import HEALPixBeam
+
+        # This can't be pickled and therefore can't be an
+        # attribute of the class.
+        beam_file = HEALPixBeam.from_file(
+            self.filename, mode="r", distributed=False, ondisk=True
+        )
+
         pol_type = tel_obj.polarisation[feed_ind]
-        ipol = self.beam_file.pol.astype(str).tolist().index(pol_type)
+        ipol = beam_file.pol.astype(str).tolist().index(pol_type)
 
         if self.single_input:
             ifeed = 0
@@ -654,23 +667,23 @@ class HEALPixBeamFile(config.Reader):
 
         if self.freq_index_type == "matched":
             ifreq = freq_ind
-            if self.beam_file.freq[ifreq] != tel_obj.frequencies[ifreq]:
+            if beam_file.freq[ifreq] != tel_obj.frequencies[ifreq]:
                 raise Exception(
                     f'freq_index_type is set to "matched" but frequency metadata '
                     f"in beam file {self.filename} does not match the telescope "
                     f"object for frequency index {ifreq}."
                 )
         elif self.freq_index_type == "nearest":
-            abs_diffs = np.abs(tel_obj.frequencies[freq_ind] - self.beam_file.freq)
+            abs_diffs = np.abs(tel_obj.frequencies[freq_ind] - beam_file.freq)
             ifreq = int(np.argmin(abs_diffs))
             # TODO raise warning if abs_diffs[ifreq] passes some thresold.
 
-        beam = self.beam_file.beam[ifreq, ipol, ifeed, :]
+        beam = beam_file.beam[ifreq, ipol, ifeed, :]
 
         Eth = hp.ud_grade(beam["Et"], tel_obj._nside)
         Eph = hp.ud_grade(beam["Ep"], tel_obj._nside)
 
-        return np.stack([Eth, Eph], axis=-1)
+        return np.stack([Eth, Eph], axis=-1).astype(np.complex128)
 
 
 AVAILABLE_BEAMS = {
