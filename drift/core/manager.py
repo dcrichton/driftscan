@@ -255,6 +255,9 @@ class ProductManager(object):
         if yconf["config"].get("skip_svd"):
             self.skip_svd = True
 
+        if yconf["config"].get("skip_svd_inv"):
+            self.skip_svd_inv = True
+
         ## Configure the KL Transforms
         self.kltransforms = {}
 
@@ -311,7 +314,7 @@ class ProductManager(object):
 
         # Generate the transfer matrices
         if self.gen_beams:
-            self.beamtransfer.generate(skip_svd=self.skip_svd)
+            self.beamtransfer.generate(skip_svd=self.skip_svd, skip_svd_inv=self.skip_svd_inv)
 
         # Generate the KLs
         if self.gen_kl:
