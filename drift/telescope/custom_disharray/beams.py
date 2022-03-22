@@ -655,7 +655,11 @@ class HEALPixBeamFile(config.Reader):
         if self.freq_index_type == "matched":
             ifreq = freq_ind
             if self.beam_file.freq[ifreq] != tel_obj.frequencies[ifreq]:
-                raise ValueError  # Do this properly.
+                raise Exception(
+                    f'freq_index_type is set to "matched" but frequency metadata '
+                    f"in beam file {self.filename} does not match the telescope "
+                    f"object for frequency index {ifreq}."
+                )
         elif self.freq_index_type == "nearest":
             abs_diffs = np.abs(tel_obj.frequencies[freq_ind] - self.beam_file.freq)
             ifreq = int(np.argmin(abs_diffs))
