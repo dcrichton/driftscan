@@ -82,8 +82,8 @@ class _HIRAXHexTile(_HIRAXDefaults, config.Reader, metaclass=abc.ABCMeta):
                     "data/hirax_hextile_template_1024.dat",
                 )
             ],
-            "spacing_ew": 6.5 / 2,
-            "spacing_ns": 8.5 / 2,
+            "spacing_ew": 6.5,
+            "spacing_ns": 8.5,
         },
     )
 
