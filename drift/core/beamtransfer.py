@@ -942,7 +942,7 @@ class BeamTransfer(config.Reader):
                         dset_sig[fi, :nmodes] = sig
 
                 # Write a few useful attributes.
-                fs.attrs["baselines"] = self.telescope.baselines
+                #fs.attrs["baselines"] = self.telescope.baselines
                 fs.attrs["m"] = mi
                 fs.attrs["frequencies"] = self.telescope.frequencies
 
