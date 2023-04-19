@@ -196,8 +196,10 @@ def rotate_thetaphi_beam(
     # Work out projection of theta_hat and phi_hat after rotation onto
     # theta_hat and phi_hat
 
+    # New polarisation coordinate axes
     bthetahat, bphihat = coord.thetaphi_plane_cart(angpos)
 
+    # Calculate rotated polarisation coordinate axes of unrotated beam in over current angpos
     nangpos = coord.cart_to_sph(coord.sph_to_cart(angpos) @ hp_rot.mat)[:, 1:]
     thetahat, phihat = coord.thetaphi_plane_cart(nangpos)
 
@@ -206,6 +208,7 @@ def rotate_thetaphi_beam(
 
     vdot = lambda a, b: np.sum(a * b, axis=-1)
 
+    # Find projection of old polarisation coordinate system onto new one
     thetarot_polpattern = np.stack(
         [vdot(thetahat_rot, bthetahat), vdot(thetahat_rot, bphihat)], axis=-1
     )
@@ -215,6 +218,7 @@ def rotate_thetaphi_beam(
     )
     coord.norm_vec2(phirot_polpattern)
 
+    # Apply projection factors to rotated beam amplitudes
     EtEp = (
         thph_amp_rot[:, 0][:, None] * thetarot_polpattern
         + thph_amp_rot[:, 1][:, None] * phirot_polpattern

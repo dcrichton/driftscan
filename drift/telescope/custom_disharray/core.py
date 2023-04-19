@@ -200,16 +200,26 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
         mro = inspect.getmro(self.__class__)
         single_pointing_class_ind = mro.index(MultiElevationSurvey) + 1
         self.single_pointing_class = mro[single_pointing_class_ind]
-        # Fetch all config properties up to single_pointing_class and initialize
-        # them in single_pointing_telescope
         single_pointing_config = _confdict_from_classes(mro[::-1])
         # And update with instance values
         single_pointing_config.update(
-            {k: v for k, v in self.__dict__.items() if k in single_pointing_config}
+            {k: v for k, v in self.__dict__.items() if k not in ["elevation_start", "elevation_stop", "npointings"]}
         )
         self.single_pointing_telescope = self.single_pointing_class.from_config(
             single_pointing_config
         )
+
+    @property
+    def npairs(self):
+        return self.single_pointing_telescope.npairs * self.npointings
+
+    @property
+    def lmax(self):
+        return self.single_pointing_telescope.lmax
+
+    @property
+    def mmax(self):
+        return self.single_pointing_telescope.mmax
 
     @property
     def elevation_pointings(self) -> np.ndarray:
