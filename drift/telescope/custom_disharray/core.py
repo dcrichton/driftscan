@@ -203,12 +203,17 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
         single_pointing_config = _confdict_from_classes(mro[::-1])
         # And update with instance values
         single_pointing_config.update(
-            {k: v for k, v in self.__dict__.items() if k not in ["elevation_start", "elevation_stop", "npointings"]}
+            {
+                k: v
+                for k, v in self.__dict__.items()
+                if k not in ["elevation_start", "elevation_stop", "npointings"]
+            }
         )
         self.single_pointing_telescope = self.single_pointing_class.from_config(
             single_pointing_config
         )
 
+    # Short-circuit calculations
     @property
     def npairs(self):
         return self.single_pointing_telescope.npairs * self.npointings
@@ -220,6 +225,24 @@ class MultiElevationSurvey(config.Reader, metaclass=abc.ABCMeta):
     @property
     def mmax(self):
         return self.single_pointing_telescope.mmax
+
+    def _quick_uniquepairs(self):
+        # Not fully general
+        single_telescope_up = self.single_pointing_telescope.uniquepairs
+        # Generalize for different numpols
+        up = np.tile(
+            single_telescope_up.reshape((single_telescope_up.shape[0] // 4, 4, -1)),
+            reps=(1, self.npointings, 1),
+        )
+        offsets = np.repeat(
+            self.single_pointing_telescope.nfeed * np.arange(self.npointings), 4
+        )
+        up += offsets[None, :, None]
+        return up.reshape((-1, 2))
+    
+    @property
+    def uniquepairs(self):
+        return self._quick_uniquepairs()
 
     @property
     def elevation_pointings(self) -> np.ndarray:
