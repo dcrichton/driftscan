@@ -588,11 +588,11 @@ class BeamTransfer(config.Reader):
                     line = fil.readline()
                     self.start_chunk = int(line)+1
                 if mpiutil.rank0:
-                    logger.info(f"Resuming from chunk {self.start_chunk}")
-            except Exception as e:
+                    logger.info(f"Resuming from chunk: {self.start_chunk}")
+            except Exception:
                 if mpiutil.rank0:
                     # Do something better here
-                    logger.info("Failed to resume from file with exception: ", e)
+                    logger.info("Failed to resume from file.")
 
         # Iterate over chunks
         for ci, fbrange in enumerate(mpiutil.split_m(nfb, num_chunks).T):
@@ -683,7 +683,7 @@ class BeamTransfer(config.Reader):
             del m_array
 
             mpiutil.barrier()
-            
+
             if mpiutil.rank0:
                 with open(self.directory + "/beam_m/MAX_CHUNK_REACHED", "w") as fil:
                     fil.write(f"{ci+1:d}\n")
