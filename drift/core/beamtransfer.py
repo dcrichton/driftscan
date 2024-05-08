@@ -185,6 +185,7 @@ class BeamTransfer(config.Reader):
 
     mem_chunk = config.Property(proptype=float, default=3.0)
     start_chunk = config.Property(proptype=int, default=0)
+    try_resume = config.Property(proptype=bool, default=False)
 
     svcut = config.Property(proptype=float, default=1e-6)
     polsvcut = config.Property(proptype=float, default=1e-4)
@@ -581,6 +582,18 @@ class BeamTransfer(config.Reader):
 
         mpiutil.barrier()
 
+        if self.try_resume:
+            try:
+                with open(self.directory + "/beam_m/MAX_CHUNK_REACHED", "r") as fil:
+                    line = fil.readline()
+                    self.start_chunk = int(line)+1
+                if mpiutil.rank0:
+                    logger.info(f"Resuming from chunk {self.start_chunk}")
+            except Exception as e:
+                if mpiutil.rank0:
+                    # Do something better here
+                    logger.info("Failed to resume from file with exception: ", e)
+
         # Iterate over chunks
         for ci, fbrange in enumerate(mpiutil.split_m(nfb, num_chunks).T):
 
@@ -669,7 +682,12 @@ class BeamTransfer(config.Reader):
 
             del m_array
 
-        mpiutil.barrier()
+            mpiutil.barrier()
+            
+            if mpiutil.rank0:
+                with open(self.directory + "/beam_m/MAX_CHUNK_REACHED", "w") as fil:
+                    fil.write(f"{ci+1:d}\n")
+
 
         et = time.time()
 
