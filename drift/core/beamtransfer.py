@@ -584,7 +584,7 @@ class BeamTransfer(config.Reader):
         # Iterate over chunks
         for ci, fbrange in enumerate(mpiutil.split_m(nfb, num_chunks).T):
 
-            if ci < self.start_chunk:
+            if ci <= self.start_chunk:
                 continue
 
             if mpiutil.rank0:
