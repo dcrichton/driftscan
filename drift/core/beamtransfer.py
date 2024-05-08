@@ -184,6 +184,7 @@ class BeamTransfer(config.Reader):
     """
 
     mem_chunk = config.Property(proptype=float, default=3.0)
+    start_chunk = config.Property(proptype=int, default=0)
 
     svcut = config.Property(proptype=float, default=1e-6)
     polsvcut = config.Property(proptype=float, default=1e-4)
@@ -582,6 +583,10 @@ class BeamTransfer(config.Reader):
 
         # Iterate over chunks
         for ci, fbrange in enumerate(mpiutil.split_m(nfb, num_chunks).T):
+
+            if ci < self.start_chunk:
+                continue
+
             if mpiutil.rank0:
                 logger.info(f"Starting chunk {int(ci + 1)} of {int(num_chunks)}")
 
