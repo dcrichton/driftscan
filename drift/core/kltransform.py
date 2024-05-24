@@ -338,7 +338,15 @@ class KLTransform(config.Reader):
 
         # Perform the generalised eigenvalue problem to get the KL-modes.
         st = time.time()
-        evals, evecs, ac = eigh_gen(cvb_sr, cvb_nr, message=f"m = {mi}")
+        try:
+            evals, evecs, ac = eigh_gen(cvb_sr, cvb_nr, message=f"m = {mi}")
+        except la.LinAlgError:
+            logger.info(f"No valid eigenvalue solution found, nulling all modes for m = {mi}")
+            evals, evecs, ac = (
+                np.zeros(cvb_sr.shape[0], dtype=cvb_sr.real.dtype),
+                np.identity(cvb_sr.shape[0], dtype=cvb_sr.dtype),
+                0.0
+            )
         et = time.time()
         logger.info(f"Time = {et - st}")
 
