@@ -67,3 +67,4 @@ find = {}
 
 [tool.setuptools.package-data]
 "drift.telescope" = ["gmrtpositions.dat"]
+"drift.telescope.custom_disharray" = ["data/hirax_hextile_template_1024.dat"]
