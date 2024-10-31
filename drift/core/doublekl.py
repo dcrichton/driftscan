@@ -45,10 +45,40 @@ class DoubleKL(kltransform.KLTransform):
         self.use_thermal = False
         cs, cn = [cv.reshape(nside, nside) for cv in self.sn_covariance(mi)]
 
-        # Find joint eigenbasis and transformation matrix
-        evals, evecs2, ac = kltransform.eigh_gen(
-            cs, cn, message="m = %d; KL step 1" % mi
-        )
+        # Only do this on step 1
+        _NSIDE_MAX = 2**15-1
+        if nside >= _NSIDE_MAX:
+            ntrim = nside - _NSIDE_MAX + 1
+            sv = self.beamtransfer.beam_singularvalues(mi)
+            svnum, _ = self.beamtransfer._svd_num(mi)
+            svvec = np.concatenate([sv[fi, :svnum[fi]] for fi in self.beamtransfer._svd_freq_iter(mi)])
+            inds_to_trim = np.argsort(svvec)[:ntrim]
+            svmask = np.ones_like(svvec, dtype=bool)
+            svmask[inds_to_trim] = False
+            inds_to_keep = np.where(svmask)[0]
+            effective_svcut = svvec[svmask].min()/svvec[svmask].max()
+            logger.info(
+                    f"Covariance matrix too large for 32bit matrix BLAS on m = {mi:5d}. "
+                    + f"Original svcut: {self.beamtransfer.svcut:.5e}. "
+                    + f"Effective svcut after trimming {ntrim:6d}/{nside:<6d} SVD modes: "
+                    + f"{effective_svcut:.5e}"
+            )
+            cs = np.ascontiguousarray(cs[svmask, :][:, svmask])
+            cn = np.ascontiguousarray(cn[svmask, :][:, svmask])
+
+            tevals, tevecs, ac = kltransform.eigh_gen(cs, cn, message=f"m = {mi}; KL step 1")
+            evals = np.zeros(nside, dtype=tevals.dtype)
+            evals[svmask] = tevals
+            del tevals
+            evecs = np.identity(nside, dtype=tevecs.dtype)
+            evecs[inds_to_keep[:, None], inds_to_keep[None, :]] = tevecs
+            del tevecs
+            evecs2 = evecs
+        else:
+            evals, evecs2, ac = kltransform.eigh_gen(cs, cn, message=f"m = {mi}; KL step 1")
+        # evals, evecs2, ac = kltransform.eigh_gen(
+        #     cs, cn, message="m = %d; KL step 1" % mi
+        # )
         evecs = evecs2.T.conj()
 
         # Get the indices that extract the high S/F ratio modes

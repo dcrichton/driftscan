@@ -488,7 +488,7 @@ class PSEstimation(config.Reader, metaclass=abc.ABCMeta):
         # Pair up each list item with its position.
         zlist = list(enumerate(range(self.telescope.mmax + 1)))
         # Partition list based on MPI rank
-        llist = mpiutil.partition_list_mpi(zlist)
+        llist = mpiutil.partition_list_mpi(zlist, method="alt")
         # Operate on sublist
         fisher_bias_list = [self.fisher_bias_m(item) for ind, item in llist]
 

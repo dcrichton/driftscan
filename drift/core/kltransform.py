@@ -339,7 +339,37 @@ class KLTransform(config.Reader):
         # Perform the generalised eigenvalue problem to get the KL-modes.
         st = time.time()
         try:
-            evals, evecs, ac = eigh_gen(cvb_sr, cvb_nr, message=f"m = {mi}")
+            # Problem if nside >= 2^15-1, BLAS backends compiled without ILP64 will fail.
+            # This is a bit sketchy, should probably check consequences and make toggleable.
+            _NSIDE_MAX = 2**15-1
+            if nside >= _NSIDE_MAX:
+                ntrim = nside - _NSIDE_MAX + 1
+                sv = self.beamtransfer.beam_singularvalues(mi)
+                svnum, _ = self.beamtransfer._svd_num(mi)
+                svvec = np.concatenate([sv[fi, :svnum[fi]] for fi in self.beamtransfer._svd_freq_iter(mi)])
+                inds_to_trim = np.argsort(svvec)[:ntrim]
+                svmask = np.ones_like(svvec, dtype=bool)
+                svmask[inds_to_trim] = False
+                inds_to_keep = np.where(svmask)[0]
+                effective_svcut = svvec[svmask].min()/svvec[svmask].max()
+                logger.info(
+                    f"Covariance matrix too large for 32bit matrix BLAS on m = {mi:5d}. "
+                    + f"Original svcut: {self.beamtransfer.svcut:.5e}. "
+                    + f"Effective svcut after trimming {ntrim:6d}/{nside:<6d} SVD modes: "
+                    + f"{effective_svcut:.5e}"
+                )
+                cvb_sr = np.ascontiguousarray(cvb_sr[svmask, :][:, svmask])
+                cvb_nr = np.ascontiguousarray(cvb_nr[svmask, :][:, svmask])
+
+                tevals, tevecs, ac = eigh_gen(cvb_sr, cvb_nr, message=f"m = {mi}")
+                evals = np.zeros(nside, dtype=tevals.dtype)
+                evals[svmask] = tevals
+                del tevals
+                evecs = np.identity(nside, dtype=tevecs.dtype)
+                evecs[inds_to_keep[:, None], inds_to_keep[None, :]] = tevecs
+                del tevecs
+            else:
+                evals, evecs, ac = eigh_gen(cvb_sr, cvb_nr, message=f"m = {mi}")
         except la.LinAlgError:
             logger.info(f"No valid eigenvalue solution found, nulling all modes for m = {mi}")
             evals, evecs, ac = (
